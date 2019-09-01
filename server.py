@@ -104,8 +104,10 @@ class main_server(object):
             if match["number"] in winners:
                 if winners[match["number"]] == int(output["team1"].split(" - ")[0]):
                     output["winner"] = 1
-                else:
+                elif winners[match["number"]] == int(output["team2"].split(" - ")[0]):
                     output["winner"] = 2
+                else:
+                    output["winner"] = 0
 
             #Add column
             if match["stage"] == max_stage:
