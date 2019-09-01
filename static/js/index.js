@@ -3,6 +3,14 @@ var context = canvas.getContext("2d")
 var matchData = []
 var scaler = 0.55
 
+function updateResolution() {
+    canvas.height = window.innerHeight * 0.98 * 2
+    canvas.width = window.innerWidth * 0.98 * 2
+    render()
+}
+updateResolution()
+window.addEventListener("resize", function() {updateResolution()})
+
 function getMatchData() {
     const http = new XMLHttpRequest()
     
@@ -18,15 +26,15 @@ function getMatchData() {
     http.open("GET", "/api", true)
     http.send()
 }
-setInterval(function() {getMatchData()}, 1000)
+setInterval(function() {getMatchData()}, 10000)
 getMatchData()
 
 function x(pos) {
-    return (pos * scaler) + 1500
+    return (pos * scaler) + (canvas.width / 2)
 }
 
 function y(pos) {
-    return (pos * scaler) + 800
+    return (pos * scaler) + (canvas.height / 2)
 }
 
 function dis(dis) {
@@ -92,14 +100,14 @@ function render() {
             maxColumn = Math.abs(columns[i])
         }
     }
-    scaler = 1500 / ((maxColumn * 600) + 230)
+    scaler = canvas.width / 2 / ((maxColumn * 600) + 230)
     
     matchPositions = {}
     for (var i = 0; i < matchData.length; i++ ) {
         match = matchData[i]
         columnPos = match.match - columnData[match.column].min + 1
-        margin = (1600 / scaler) / ((columnData[match.column].max - columnData[match.column].min) + 2)
-        matchPositions[match.match] = [match.column * 600, (-800 / scaler) + (columnPos * margin)]
+        margin = (canvas.height / scaler) / ((columnData[match.column].max - columnData[match.column].min) + 2)
+        matchPositions[match.match] = [match.column * 600, ((0 - (canvas.height / 2)) / scaler) + (columnPos * margin)]
         drawMatch(match, matchPositions[match.match][0], matchPositions[match.match][1])
     }
     
