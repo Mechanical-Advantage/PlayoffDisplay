@@ -101,7 +101,7 @@ class main_server(object):
                         output[key] += " - " + str(score[0][0]) + " pts"
 
             #Add winner
-            if match["number"] in winners:
+            if match["number"] in winners and output["team1"] != "" and output["team2"] != "":
                 if winners[match["number"]] == int(output["team1"].split(" - ")[0]):
                     output["winner"] = 1
                 elif winners[match["number"]] == int(output["team2"].split(" - ")[0]):
