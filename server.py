@@ -67,8 +67,8 @@ class main_server(object):
         winners = {}
         max_match = cur.execute("SELECT MAX(match_number) FROM match_structure").fetchall()[0][0]
         for match in range(1, max_match + 1):
-            results = cur.execute("SELECT team FROM match_scores WHERE match=? ORDER BY score DESC, penalties ASC, team ASC LIMIT 1", (match,)).fetchall()
-            if len(results) > 0:
+            results = cur.execute("SELECT team FROM match_scores WHERE match=? ORDER BY score DESC, penalties ASC, team ASC", (match,)).fetchall()
+            if len(results) >= 2:
                 winners[match] = results[0][0]
 
         #Fetch base matches
