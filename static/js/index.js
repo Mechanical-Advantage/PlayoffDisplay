@@ -70,7 +70,7 @@ function drawMatch(match, xPos, yPos) {
     // teams
     context.textAlign = "center"
     context.textBaseline = "middle"
-    context.font = dis(55).toString() + "px sans-serif"
+    context.font = dis(53).toString() + "px sans-serif"
     context.fillStyle = "#000000"
     context.fillText(match.team1, x(xPos), y(yPos-50))
     context.fillText(match.team2, x(xPos), y(yPos+50))
