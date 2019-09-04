@@ -1,6 +1,7 @@
 import sqlite3 as sql
 import cherrypy
 import json
+from datetime import datetime
 from pathlib import Path
 import sys
 import os
@@ -16,13 +17,13 @@ if not Path(db_path).is_file():
     cur = conn.cursor()
     cur.execute("""CREATE TABLE teams (
         rank INTEGER NOT NULL,
-        number INTEGER NOT NULL UNIQUE,
-        name TEXT
+        number INTEGER NOT NULL UNIQUE
         ); """)
     cur.execute("""CREATE TABLE match_structure (
         id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-        stage INTEGER NOT NULL,
         match_number INTEGER UNIQUE,
+        schedule_number INTEGER,
+        stage INTEGER NOT NULL,
         team1 TEXT NOT NULL,
         team2 TEXT NOT NULL,
         rank_min INTEGER
@@ -33,6 +34,14 @@ if not Path(db_path).is_file():
         score INTEGER NOT NULL DEFAULT 0,
         penalties INTEGER NOT NULL DEFAULT 0
         ); """)
+    cur.execute("""CREATE TABLE config (
+        key TEXT NOT NULL UNIQUE,
+        value TEXT
+        ); """)
+    cur.execute("INSERT INTO config(key,value) VALUES ('event_name','No Event Name')")
+    cur.execute("INSERT INTO config(key,value) VALUES ('tables','6')")
+    cur.execute("INSERT INTO config(key,value) VALUES ('start_time','0')")
+    cur.execute("INSERT INTO config(key,value) VALUES ('cycle_time','480')")
     conn.commit()
     conn.close()
 
@@ -48,6 +57,7 @@ class main_server(object):
     <link rel="stylesheet" type="text/css" href="/static/css/index.css"></link>
 </head>
 <body>
+<div id="eventName" class="event"></div>
 <canvas id="mainCanvas" width=3000 height=1600></canvas>
 </body>
 <script src="/static/js/index.js"></script>
@@ -62,6 +72,13 @@ class main_server(object):
 
         #Get max stage
         max_stage = cur.execute("SELECT MAX(stage) FROM match_structure").fetchall()[0][0]
+        
+        #Get start time and cycle time
+        start_time = int(cur.execute("SELECT value FROM config WHERE key='start_time'").fetchall()[0][0])
+        cycle_time = int(cur.execute("SELECT value FROM config WHERE key='cycle_time'").fetchall()[0][0])
+        
+        #Get event name
+        event = cur.execute("SELECT value FROM config WHERE key='event_name'").fetchall()[0][0]
 
         #Determine winners
         winners = {}
@@ -72,9 +89,9 @@ class main_server(object):
                 winners[match] = results[0][0]
 
         #Fetch base matches
-        matches = cur.execute("SELECT match_number,stage,team1,team2 FROM match_structure ORDER BY match_number").fetchall()
+        matches = cur.execute("SELECT match_number,schedule_number,stage,team1,team2 FROM match_structure ORDER BY match_number").fetchall()
         for i in range(len(matches)):
-            matches[i] = {"number": matches[i][0], "stage": matches[i][1], "team1": matches[i][2], "team2": matches[i][3]}
+            matches[i] = {"number": matches[i][0], "schedule_number": matches[i][1], "stage": matches[i][2], "team1": matches[i][3], "team2": matches[i][4]}
 
         #Convert to output format
         matches_output = []
@@ -123,11 +140,16 @@ class main_server(object):
                     output["column"] = max_stage - match["stage"]
                 for i in output["inputs"]:
                     matches_sides[i] = matches_sides[match["number"]]
-            
+
+            #Add time
+            match_start = datetime.fromtimestamp(start_time + ((match["schedule_number"] - 1) * cycle_time))
+            match_end = datetime.fromtimestamp(start_time + (match["schedule_number"] * cycle_time))
+            output["time"] = match_start.strftime("%-I:%M") + "-" + match_end.strftime("%-I:%M")
+
             matches_output.append(output)
                 
         conn.close()
-        return(json.dumps(matches_output))
+        return(json.dumps({"event": event, "matches": matches_output}))
 
 if __name__ == "__main__":
     port = default_port

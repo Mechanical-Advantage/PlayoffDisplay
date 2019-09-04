@@ -89,6 +89,25 @@ while match_number < highest_match:
     queue_current = queue_building
     queue_building = []
 
+#Assign schedule numbers
+schedule_number = 1
+table_count = 0
+last_stage = 0
+matches = cur.execute("SELECT match_number,stage FROM match_structure ORDER BY match_number").fetchall()
+for i in range(len(matches)):
+    matches[i] = {"number": matches[i][0], "stage": matches[i][1]}
+tables = int(cur.execute("SELECT value FROM config WHERE key='tables'").fetchall()[0][0])
+for match in matches:
+    if match["stage"] > last_stage:
+        last_stage = match["stage"]
+        table_count = 0
+        schedule_number += 1
+    if table_count >= tables:
+        table_count = 0
+        schedule_number += 1
+    cur.execute("UPDATE match_structure SET schedule_number=? WHERE match_number=?", (schedule_number,match["number"]))
+    table_count += 1
+
 #Clean up
 conn.commit()
 conn.close()

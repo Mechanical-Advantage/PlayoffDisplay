@@ -17,7 +17,10 @@ function getMatchData() {
     http.onreadystatechange = function() {
         if (this.readyState == 4) {
             if (this.status == 200) {
-                matchData = JSON.parse(this.responseText)
+                result = JSON.parse(this.responseText)
+                matchData = result.matches
+                document.getElementById("eventName").innerHTML = result.event
+                window.document.title = result.event + " Playoffs"
                 render()
             }
         }
@@ -60,12 +63,12 @@ function drawMatch(match, xPos, yPos) {
     context.lineTo(x(xPos+200), y(yPos))
     context.stroke()
     
-    // match number
+    // time
     context.textAlign = "center"
     context.textBaseline = "bottom"
-    context.font = dis(110).toString() + "px sans-serif"
+    context.font = dis(80).toString() + "px sans-serif"
     context.fillStyle = "#000000"
-    context.fillText(match.match, x(xPos), y(yPos-110))
+    context.fillText(match.time, x(xPos), y(yPos-110))
     
     // teams
     context.textAlign = "center"
