@@ -1,4 +1,5 @@
 import sqlite3 as sql
+import math
 
 conn = sql.connect("playoffs.db")
 cur = conn.cursor()
@@ -90,23 +91,26 @@ while match_number < highest_match:
     queue_building = []
 
 #Assign schedule numbers
-schedule_number = 1
-table_count = 0
-last_stage = 0
-matches = cur.execute("SELECT match_number,stage FROM match_structure ORDER BY match_number").fetchall()
-for i in range(len(matches)):
-    matches[i] = {"number": matches[i][0], "stage": matches[i][1]}
 tables = int(cur.execute("SELECT value FROM config WHERE key='tables'").fetchall()[0][0])
-for match in matches:
-    if match["stage"] > last_stage:
-        last_stage = match["stage"]
-        table_count = 0
+schedule_number = 0
+for stage in range(rounds + 1):
+    match_count = cur.execute("SELECT COUNT(match_number) FROM match_structure WHERE stage=?", (stage,)).fetchall()[0][0]
+    schedule_number_counts = [0] * math.ceil(match_count / tables)
+    i = 0
+    while sum(schedule_number_counts) < match_count:
+        schedule_number_counts[i] += 1
+        i += 1
+        if i >= len(schedule_number_counts):
+            i = 0
+    matches = cur.execute("SELECT match_number FROM match_structure WHERE stage=? ORDER BY match_number", (stage,)).fetchall()
+    for i in range(len(matches)):
+        matches[i] = matches[i][0]
+    i = 0
+    for schedule_number_count in schedule_number_counts:
         schedule_number += 1
-    if table_count >= tables:
-        table_count = 0
-        schedule_number += 1
-    cur.execute("UPDATE match_structure SET schedule_number=? WHERE match_number=?", (schedule_number,match["number"]))
-    table_count += 1
+        for f in range(0, schedule_number_count):
+            cur.execute("UPDATE match_structure SET schedule_number=? WHERE match_number=?", (schedule_number,matches[i]))
+            i += 1
 
 #Clean up
 conn.commit()
