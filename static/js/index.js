@@ -138,9 +138,8 @@ function render() {
             }
             
             context.moveTo(x(startX), y(startY))
-            context.lineTo(x(((endX - startX) / 2) + startX), y(startY))
-            context.lineTo(x(((endX - startX) / 2) + startX), y(endY))
-            context.lineTo(x(endX), y(endY))
+            middleX = ((endX - startX) / 2) + startX
+            context.bezierCurveTo(x(middleX), y(startY), x(middleX), y(endY), x(endX), y(endY))
         }
     }
     context.stroke()
