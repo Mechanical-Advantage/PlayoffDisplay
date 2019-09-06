@@ -1,0 +1,15 @@
+body {
+    font-family: sans-serif;
+    font-size: 15px;
+}
+
+.printed-text {
+    color: #00AA00;
+}
+
+.stage-header {
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 3px;
+    font-size: 20px;
+}

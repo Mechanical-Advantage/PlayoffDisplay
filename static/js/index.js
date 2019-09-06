@@ -26,7 +26,7 @@ function getMatchData() {
         }
     }
     
-    http.open("GET", "/api", true)
+    http.open("GET", "/api/matches", true)
     http.send()
 }
 setInterval(function() {getMatchData()}, 10000)
@@ -63,12 +63,20 @@ function drawMatch(match, xPos, yPos) {
     context.lineTo(x(xPos+200), y(yPos))
     context.stroke()
     
-    // time
+    // match & time
+    if (showMatches) {
+        size = 60
+        text = "M" + match.match + "; " + match.time
+    } else {
+        size = 80
+        text = match.time
+    }
+    
     context.textAlign = "center"
     context.textBaseline = "bottom"
-    context.font = dis(80).toString() + "px sans-serif"
+    context.font = dis(size).toString() + "px sans-serif"
     context.fillStyle = "#000000"
-    context.fillText(match.time, x(xPos), y(yPos-110))
+    context.fillText(text, x(xPos), y(yPos-110))
     
     // teams
     context.textAlign = "center"
