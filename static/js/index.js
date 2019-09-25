@@ -26,7 +26,7 @@ function getMatchData() {
         }
     }
     
-    http.open("GET", "/api/matches", true)
+    http.open("GET", "/api", true)
     http.send()
 }
 setInterval(function() {getMatchData()}, 10000)

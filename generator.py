@@ -74,7 +74,8 @@ cur.execute("DELETE FROM match_structure WHERE team1=team2")
 #Assign match numbers
 highest_match = cur.execute("SELECT COUNT(*) FROM match_structure").fetchall()[0][0]
 starting_teams = cur.execute("SELECT team1,team2 FROM match_structure WHERE stage=?", (rounds,)).fetchall()
-cur.execute("UPDATE match_structure SET match_number=? WHERE stage=?", (highest_match,rounds))
+starting_match_number = int(cur.execute("SELECT value FROM config WHERE key='match_number_start'").fetchall()[0][0]) - 1
+cur.execute("UPDATE match_structure SET match_number=? WHERE stage=?", (highest_match+starting_match_number,rounds))
 
 match_number = 1
 queue_current = [starting_teams[0][1], starting_teams[0][0]]
@@ -83,7 +84,7 @@ while match_number < highest_match:
     for queue_item in queue_current:
         if queue_item[:1] == "w":
             match_number += 1
-            cur.execute("UPDATE match_structure SET match_number=? WHERE id=?",(highest_match-match_number+1,queue_item[1:]))
+            cur.execute("UPDATE match_structure SET match_number=? WHERE id=?",(highest_match-match_number+1+starting_match_number,queue_item[1:]))
             to_add = cur.execute("SELECT team1,team2 FROM match_structure WHERE id=?",(queue_item[1:],)).fetchall()
             queue_building.append(to_add[0][1])
             queue_building.append(to_add[0][0])
