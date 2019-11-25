@@ -154,10 +154,18 @@ class main_server(object):
                 for i in output["inputs"]:
                     matches_sides[i] = matches_sides[match["number"]]
 
+            #Function for rendering time w/o padding
+            def convert_time(timestamp):
+                hour = datetime.fromtimestamp(timestamp).strftime("%I")
+                while hour[:1] == "0":
+                    hour = hour[1:]
+                minute_string = ":%M"
+                return(hour + datetime.fromtimestamp(timestamp).strftime(minute_string))
+
             #Add time
-            match_start = datetime.fromtimestamp(start_time + ((match["schedule_number"] - 1) * cycle_time))
-            match_end = datetime.fromtimestamp(start_time + (match["schedule_number"] * cycle_time))
-            output["time"] = match_start.strftime("%-I:%M") + "-" + match_end.strftime("%-I:%M")
+            match_start = start_time + ((match["schedule_number"] - 1) * cycle_time)
+            match_end = start_time + (match["schedule_number"] * cycle_time)
+            output["time"] = convert_time(match_start) + "-" + convert_time(match_end)
 
             matches_output.append(output)
                 
