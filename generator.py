@@ -1,3 +1,5 @@
+# Generate playoff bracket based on team list in db
+
 import sqlite3 as sql
 import math
 

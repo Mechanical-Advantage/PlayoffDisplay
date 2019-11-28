@@ -1,3 +1,5 @@
+# Serves display of generated playoff bracket
+
 import sqlite3 as sql
 import cherrypy
 import json
